@@ -1,0 +1,76 @@
+version: '3.3'
+
+services:
+  flightaware-skyview1090:
+    image: boxel/flightaware-skyview1090
+    environment:
+      - LATITUDE=${LATITUDE:-0.0}
+      - LONGITUDE=${LONGITUDE:-0.0}
+    ports:
+      - "${FLIGHTAWARE_SKYVIEW1090_PORT:-8081}:80"
+    volumes:
+      - run-readsb:/run/dump1090-fa
+
+  wiedehopf-tar1090:
+    image: boxel/wiedehopf-tar1090
+    environment:
+      - LATITUDE=${LATITUDE:-0.0}
+      - LONGITUDE=${LONGITUDE:-0.0}
+    ports:
+      - "${WIEDEHOPF_TAR1090_PORT:-8082}:8081"
+    volumes:
+      - run-readsb:/run/dump1090-fa
+
+  mictronics-readsb:
+    image: boxel/mictronics-readsb
+    environment:
+      - USE_AIRSPY=${USE_AIRSPY:-true}
+      - READSB_RECEIVER_OPTIONS=--net-only --net-connector=localhost,33333,beast_in --net-connector=db.adsbx.org,55002,beast_out
+      - LATITUDE=${LATITUDE:-0.0}
+      - LONGITUDE=${LONGITUDE:-0.0}
+      - AIRSPY_OPTIONS=${AIRSPY_OPTIONS:--v -f 1 -w 5 -t 300}
+    devices:
+      - ${AIRSPY_DEVICE}
+    networks:
+      flight:
+        aliases:
+          - readsb
+    ports:
+      - "30001:30001"
+      - "30002:30002"
+      - "30003:30003"
+      - "30004:30004"
+      - "30005:30005"
+      - "33333:33333"
+    volumes:
+      - run-readsb:/run/readsb
+
+  mutability-mlat-client:
+    image: boxel/mutability-mlat-client
+    environment:
+      - INPUT_CONNECT=readsb:30005
+      - LATITUDE=${LATITUDE:-0.0}
+      - LONGITUDE=${LONGITUDE:-0.0}
+      - ALTITUDE=${ALTITUDE:-0}
+      - MLAT_SERVER=feed.adsbexchange.com:31090
+      - MLAT_USER=${MLAT_USER:-UNKNOWN-BOXEL-USER}
+      - RESULTS_BEAST_CONNECT=--results beast,connect,readsb:30004 --results beast,connect,db.adsbx.org:55002
+    networks:
+      flight:
+        aliases:
+          - mlat-client
+
+  wiedehopf-graphs1090:
+    image: boxel/wiedehopf-graphs1090
+    ports:
+      - "8083:80"
+    volumes:
+      - run-readsb:/usr/share/graphs1090/data-symlink/data
+      - graphs1090-collectd-rrd:/var/lib/collectd/rrd
+
+volumes:
+  run-readsb:
+  graphs1090-collectd-rrd:
+
+networks:
+  flight:
