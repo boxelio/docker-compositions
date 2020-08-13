@@ -5,6 +5,6 @@ and Docker containers.
 
 ## Components
 
-| Name | Docker Image | Github |
+| Name | Docker Image / Github | Description |
 | ---- | ------------ | ------ |
-| airspy_adsb | [boxel/airspy-adsb](https://hub.docker.com/repository/docker/boxel/airspy-adsb) | [boxelio/dockerfiles](https://github.com/boxelio/dockerfiles/tree/master/flight/airspy-adsb) |
+| airspy_adsb | [boxel/airspy-adsb](https://hub.docker.com/repository/docker/boxel/airspy-adsb) / [boxelio/dockerfiles](https://github.com/boxelio/dockerfiles/tree/master/flight/airspy-adsb) | Optimized ADS-B decoding using an Airspy SDR |
